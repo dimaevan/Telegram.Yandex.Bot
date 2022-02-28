@@ -1,9 +1,8 @@
 import asyncio
 import aiohttp
 from bs4 import BeautifulSoup
-from db import access_db
 from utils import format_date
-
+import db
 URL = "https://vc.ru/popular"
 
 
@@ -15,11 +14,12 @@ def parsing(source):
         date = big_div.find(attrs={"air-module": "module.entry"}).get("data-publish-date")
         return link, int(date)
 
+
 async def scraper():
     async with aiohttp.ClientSession() as session:
         async with session.get(URL) as resp:
             response = await resp.text()
-            print(parsing(response))
+            db.insert(*parsing(response))
 
 if __name__ == "__main__":
     asyncio.run(scraper())

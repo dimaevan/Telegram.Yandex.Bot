@@ -23,7 +23,7 @@ class Update:
 updates = []
 
 
-def build_query(method, host_url=host, token=my_config["token"]):
+def build_query(method, host_url=host, token=my_config["bot"]["token"]):
     return host_url + "/bot" + token + "/" + method
 
 

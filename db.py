@@ -11,6 +11,8 @@ def access_db(query):
         cursor.execute(query)
         connection.commit()
         cursor.close()
+    except psycopg2.IntegrityError:
+        print('already exists')
     except psycopg2.Error as e:
         print(f"Warning: {e}")
     finally:

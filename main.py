@@ -3,7 +3,7 @@ import aiohttp
 import pprint
 from config import data_config
 from dataclasses import dataclass
-from datetime import datetime
+from utils import format_date
 
 my_config = data_config()
 host = "https://api.telegram.org"
@@ -17,7 +17,7 @@ class Update:
     text: str
 
     def __repr__(self):
-        return datetime.fromtimestamp(self.date).strftime("%d %B %Y %I:%M:%S")
+        return format_date(self.date)
 
 
 updates = []

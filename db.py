@@ -1,6 +1,7 @@
 import psycopg2
 import config
-# TODO  INSERT HTML
+
+
 conf = config.data_config()["database"]
 
 
@@ -30,6 +31,4 @@ def insert(url, date):
 
 
 if __name__ == "__main__":
-
     init()
-    insert('https://vc.ru/offline/372275-nuzhno-zakanchivat-ves-etot-goskapitalizm-deripaska-fridman-i-tinkov-vyskazalis-protiv-voyny-na-ukraine', 1646052970)

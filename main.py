@@ -15,9 +15,10 @@ class Update:
     chat: int
     date: int
     text: str
+    update_id: int
 
     def __repr__(self):
-        return format_date(self.date)
+        return str(f"{format_date(self.date)} {self.text} {self.update_id}")
 
 
 updates = []
@@ -28,49 +29,66 @@ def build_query(method, host_url=host, token=my_config["bot"]["token"]):
 
 
 def pars(data: dict) -> None:
+    last_id = 0
     if data["result"]:
         for message in data["result"]:
             x = Update(from_id=message['message']["from"]["id"],
                        chat=message['message']['chat']['id'],
                        date=message['message']['date'],
                        text=message['message']['text'],
+                       update_id=message['update_id']
                        )
             if x not in updates:
                 updates.append(x)
-        print(updates)
+            last_id = x.update_id
+
+    return last_id
 
 
-async def main():
+async def init():
     async with aiohttp.ClientSession() as session:
         url = build_query("getMe")
 
         async with session.get(url) as resp:
             response = await resp.json()
-            pprint.pprint(response)
+            if response['ok'] is True:
+                print('Bot is ok!')
 
 
 async def poller():
+    print('Start poller')
     async with aiohttp.ClientSession() as session:
-        url = build_query("getUpdates?timeout=15")
-        print(url)
+        off = 0
         while True:
+            url = build_query(f"getUpdates?offset={off}")
             async with session.get(url) as resp:
                 response = await resp.json()
-                pars(response)
+            if response["result"]:
+                off = pars(response) + 1
+                print(updates)
             await asyncio.sleep(10)
 
 
 async def answer():
+    print('Start answer')
     async with aiohttp.ClientSession() as session:
+        text = "Hello!"
 
-        url = build_query("sendMessage?timeout=15")
-        print(url)
         while True:
-            async with session.get(url) as resp:
-                response = await resp.json()
-                pprint.pprint(response)
-            await asyncio.sleep(10)
+            if updates:
+                for x in updates:
+                    chat_id = x.chat
+                    updates.remove(x)
+                    url = build_query(f"sendMessage?chat_id={chat_id}&text={text}")
+                    async with session.get(url) as resp:
+                        response = await resp.json()
+                        pprint.pprint(response)
+
+
+async def main():
+    await asyncio.gather(poller(), answer())
 
 
 if __name__ == "__main__":
-    asyncio.run(poller())
+    asyncio.run(init())
+    asyncio.run(main())

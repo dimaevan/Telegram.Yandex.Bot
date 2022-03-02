@@ -1,7 +1,6 @@
 import asyncio
 import aiohttp
 from bs4 import BeautifulSoup
-from utils import format_date
 import db
 URL = "https://vc.ru/popular"
 

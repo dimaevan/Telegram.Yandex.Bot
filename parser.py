@@ -12,16 +12,16 @@ def parsing(source):
         link = big_div.find(name="a", class_="content-link").get('href')
         date = big_div.find(attrs={"air-module": "module.entry"})\
             .get("data-publish-date")
-        return link, int(date)
+        return link
 
 
-async def scraper():
+async def scraper(time):
     async with aiohttp.ClientSession() as session:
         async with session.get(URL) as resp:
             while True:
                 response = await resp.text()
-                db.insert_url(*parsing(response))
-                await asyncio.sleep(60*60)
+                db.insert_url(parsing(response))
+                await asyncio.sleep(time * 60)
 
 if __name__ == "__main__":
-    asyncio.run(scraper())
+    asyncio.run(scraper(1))

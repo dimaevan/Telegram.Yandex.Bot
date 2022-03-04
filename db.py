@@ -30,8 +30,7 @@ def init_tables():
     access_db(query_init, True)
     query_init = """
     CREATE TABLE IF NOT EXISTS chat
-    (id serial PRIMARY KEY, chat_id bigint UNIQUE,
-     link_id serial );
+    (id serial PRIMARY KEY, chat_id bigint UNIQUE, link_id serial );
     """
     access_db(query_init, True)
 
@@ -50,7 +49,8 @@ def insert_chat(chat_id):
 
 def get_last():
     query = """SELECT url FROM link ORDER BY link_id DESC LIMIT 1; """
-    return access_db(query)[0][0]
+    if access_db(query):
+        return access_db(query)[0][0]
 
 
 def get_chats():

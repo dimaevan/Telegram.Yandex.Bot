@@ -94,11 +94,8 @@ async def poller(offset=0):
                 if x.text == "/start":
                     db.insert_chat(x.chat_id)
                     await answer(words.get("/start"), x.chat_id)
-                    last_news_link = db.get_last()[1]
+                    last_news_link = db.get_last()
                     await answer(f"Лови {last_news_link}", x.chat_id)
-                # else:
-                #     text = x.text
-                #     await answer(text, x.chat_id)
 
 
 async def check_update():

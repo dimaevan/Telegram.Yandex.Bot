@@ -6,7 +6,6 @@ conf = config.data_config()["database"]
 
 
 def access_db(query, commit=False):
-
     try:
         connection = psycopg2.connect(**conf)
         cursor = connection.cursor()
@@ -27,12 +26,12 @@ def access_db(query, commit=False):
 
 def init_tables():
     query_init = """CREATE TABLE IF NOT EXISTS link
-     (link_id serial PRIMARY KEY , url TEXT);"""
+     (link_id serial PRIMARY KEY , url TEXT UNIQUE);"""
     access_db(query_init, True)
     query_init = """
     CREATE TABLE IF NOT EXISTS chat
     (id serial PRIMARY KEY, chat_id bigint UNIQUE,
-     link_id serial REFERENCES link );
+     link_id serial );
     """
     access_db(query_init, True)
 
@@ -50,8 +49,8 @@ def insert_chat(chat_id):
 
 
 def get_last():
-    query = """SELECT link_id, url FROM link DESK LIMIT 1; """
-    return access_db(query)[0]
+    query = """SELECT url FROM link ORDER BY link_id DESC LIMIT 1; """
+    return access_db(query)[0][0]
 
 
 def get_chats():
@@ -65,7 +64,12 @@ def update_link():
     access_db(query, True)
 
 
+def truncate_tables():
+    query = """TRUNCATE chat"""
+    access_db(query, True)
+    query = """TRUNCATE link"""
+    access_db(query, True)
+
+
 if __name__ == "__main__":
-    init_tables()
     print(get_last())
-    print(get_chats())

@@ -1,20 +1,15 @@
-import pprint
-
+from dataclasses import dataclass
+from config import data_config
+from collections import deque
+from parser import scraper
 import asyncio
 import aiohttp
-import sys
-
 import db
-from config import data_config
-from dataclasses import dataclass
-from parser import scraper
-
-
-from collections import deque
 
 my_config = data_config()
 host = "https://api.telegram.org"
 words = {'/start': "Привет, Я бот, отправляющий последнюю новость с vc.ru"}
+updates = deque()
 
 
 @dataclass
@@ -28,9 +23,6 @@ class Update:
 
     def __repr__(self):
         return str(f"{self.text} {self.update_id}")
-
-
-updates = deque()
 
 
 def build_query(method, host_url=host, token=my_config["bot"]["token"]):
@@ -63,7 +55,7 @@ async def init():
 
 
 async def answer(text, chat_id):
-    sys.stdout.write('\rStart answer')
+    print('Start answer')
     async with aiohttp.ClientSession() as session:
         url = build_query("sendMessage")
         params = {"chat_id": chat_id, "text": text}
@@ -73,36 +65,37 @@ async def answer(text, chat_id):
 async def poller(offset=0):
     async with aiohttp.ClientSession() as session:
         while True:
-            sys.stdout.write('\rPolling')
+            print('Polling')
             url = build_query("getUpdates")
             params = {"offset": offset}
             async with session.get(url, params=params) as resp:
                 response = await resp.json()
-            # pprint.pprint(response)
-            if response["result"]:
+            if response.get("result"):
                 offset = pars(response) + 1
             if updates:
                 x: Update = updates.popleft()
+                last_news_link = db.get_last()
                 if x.text == "/start":
                     db.insert_chat(x.chat_id)
                     await answer(words.get("/start"), x.chat_id)
-                    last_news_link = db.get_last()[1]
                     await answer(f"Лови {last_news_link}", x.chat_id)
-                # else:
-                #     text = x.text
-                #     await answer(text, x.chat_id)
+                if x.text == "/last":
+                    await answer(f"Лови {last_news_link}", x.chat_id)
 
 
 async def check_update():
-    last_link_id: int = db.get_last()[0]
+    last_link_id = db.get_last()
     while True:
-        await asyncio.sleep(600)
-        new_link_id, url = db.get_last()
+        print("Check update")
+        new_link_id, url = await db.get_last()
         if last_link_id is not new_link_id:
             chats = db.get_chats()
             for chat in chats:
                 await answer(f"Лови {url}", chat)
             db.update_link()
+        else:
+            print("No update")
+        await asyncio.sleep(10)
 
 
 async def main(update=1):

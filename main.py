@@ -1,14 +1,11 @@
-import pprint
-
 import asyncio
 import aiohttp
 import sys
 
 import db
 from config import data_config
-from dataclasses import dataclass
+# from dataclasses import dataclass
 from parser import scraper
-
 
 from collections import deque
 
@@ -17,17 +14,28 @@ host = "https://api.telegram.org"
 words = {'/start': "Привет, Я бот, отправляющий последнюю новость с vc.ru"}
 
 
-@dataclass
-class Update:
-    from_id: int
-    date: int
-    text: str
-    chat_id: int
-    update_id: int
-    message_id: int
+# Hosting version python < 3.7 :C
+# @dataclass
+# class Update:
+#     from_id: int
+#     date: int
+#     text: str
+#     chat_id: int
+#     update_id: int
+#     message_id: int
+#
+#     def __repr__(self):
+#         return str(f"{self.text} {self.update_id}")
 
-    def __repr__(self):
-        return str(f"{self.text} {self.update_id}")
+
+class Update:
+    def __init__(self, from_id, date, text, chat_id, update_id, message_id):
+        self.from_id = from_id
+        self.date = date
+        self.text = text
+        self.chat_id = chat_id
+        self.update_id = update_id
+        self.message_id = message_id
 
 
 updates = deque()

@@ -19,13 +19,11 @@ def search_last_link(source):
 async def scraper(session, time):
     async with session.get(URL) as resp:
         while True:
-            log.info("Run parser")
+            log.info(f"Run parser, search for news on {URL} ")
             response = search_last_link(await resp.text())
             last_url = db.get_last_url()
             if last_url != response:
                 if db.insert_url_into_db(response):
                     log.info(f"Get new url {response}")
-            else:
-                log.info("No new links :c")
-            log.info(f"Parser is sleeping for {time*60}")
+            log.info(f"No new links :c, parser is sleeping for {time} minutes ")
             await asyncio.sleep(time * 60)

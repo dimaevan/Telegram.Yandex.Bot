@@ -53,25 +53,26 @@ async def answer(text, chat_id, session):
     params = {"chat_id": chat_id}
     last_news_link = db.get_last_url()
     if text:
+        db.insert_chat_into_db(chat_id)
         if text == "/start":
-            db.insert_chat_into_db(chat_id)
             params.update({"text": words.get(text)})
             await session.get(url, params=params)
-            params.update({"text": f"Лови {last_news_link}"})
+
+            params.update({"text": f"Лови последнюю новость {last_news_link}"})
             await session.get(url, params=params)
-        if text.startswith("/last"):
+        elif text.startswith("/last"):
             params.update({"text": f"{last_news_link}"})
             await session.get(url, params=params)
         else:
             params.update({"text": text})
             await session.get(url, params=params)
 
-        log.info(f"Answer to chat:{chat_id} {params.get('text')}")
+        log.info(f"Answer to chat: {chat_id} {params.get('text')}")
 
 
 async def poller(session):
     offset = 0
-    log.info("Poller starting")
+    log.info("Starting poller")
     url = build_query("getUpdates")
     while True:
         params = {"offset": offset}
@@ -81,16 +82,17 @@ async def poller(session):
             pars(response.get("result"))
         if updates:
             offset = updates[-1].update_id + 1
-            x: Update = updates.popleft()
-            asyncio.create_task(answer(x.text, x.chat_id, session))
+            event: Update = updates.popleft()
+            asyncio.create_task(answer(event.text, event.chat_id, session))
+
+        await asyncio.sleep(1)
 
 
 async def distribution(session):
     while True:
         links = db.get_last_not_sent_urls()
         if links:
-            log.info("Start distribution")
-            log.info(f"New links are {links}")
+            log.info(f"Start distribution, new links are {links}")
             chats = db.get_chats()
             for link in links:
                 url = link[0]
@@ -98,11 +100,11 @@ async def distribution(session):
                     await answer(url, chat, session)
                 log.info(f"New url send to {len(chats)} chats")
                 db.change_status_link(str(url))
-        log.info("Distributor is sleeping")
+        log.info("No new links, distributor is sleeping")
         await asyncio.sleep(30)
 
 
-async def main(update=1):
+async def main(update=10):
 
     async with aiohttp.ClientSession() as session:
         await init(session)

@@ -84,11 +84,10 @@ async def poller(session):
             offset = updates[-1].update_id + 1
             event: Update = updates.popleft()
             asyncio.create_task(answer(event.text, event.chat_id, session))
-
         await asyncio.sleep(1)
 
 
-async def distribution(session):
+async def distribution(session, time):
     while True:
         links = db.get_last_not_sent_urls()
         if links:
@@ -100,8 +99,7 @@ async def distribution(session):
                     await answer(url, chat, session)
                 log.info(f"New url send to {len(chats)} chats")
                 db.change_status_link(str(url))
-        log.info("No new links, distributor is sleeping")
-        await asyncio.sleep(30)
+        await asyncio.sleep(time * 60)
 
 
 async def main(update=10):
@@ -110,7 +108,7 @@ async def main(update=10):
         await init(session)
         task1 = asyncio.create_task(poller(session))
         task2 = asyncio.create_task(scraper(session, update))
-        task3 = asyncio.create_task(distribution(session))
+        task3 = asyncio.create_task(distribution(session, update))
         await task1
         await task2
         await task3

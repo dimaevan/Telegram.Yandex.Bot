@@ -83,12 +83,5 @@ def get_chats() -> list:
     return [x[0] for x in chats]
 
 
-def truncate_tables() -> None:
-    query = """TRUNCATE chat"""
-    access_db(query)
-    query = """TRUNCATE link"""
-    access_db(query)
-
-
 if __name__ == "__main__":
     print(insert_url_into_db("www.tesdt.com"))

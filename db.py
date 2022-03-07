@@ -39,7 +39,8 @@ def init_tables():
 
 def insert_url_into_db(url) -> bool:
     query = f"INSERT INTO link (url) VALUES ('{url}');"
-    return access_db(query)
+    access_db(query, True)
+    return True
 
 
 def insert_chat_into_db(chat_id) -> None:
@@ -90,7 +91,4 @@ def truncate_tables() -> None:
 
 
 if __name__ == "__main__":
-    init_tables()
-    print(get_last_url())
-    print(get_chats())
-    print(get_last_not_sent_urls())
+    print(insert_url_into_db("www.tesdt.com"))

@@ -25,5 +25,5 @@ async def scraper(session, time):
                 db.insert_url_into_db(response)
                 log.info(f"Get new url {response}")
             log.info(f"No new links,"
-                     f" parser is sleeping for {time} minutes")
+                     f" parser will sleeping for {time} minutes")
             await asyncio.sleep(time * 1)

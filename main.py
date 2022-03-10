@@ -27,7 +27,7 @@ def build_query(method, host_url=host, token=my_config["bot"]["token"]):
     return f"{host_url}/bot{token}/{method}"
 
 
-def pars(data: list) -> None:
+def parsing(data: list) -> None:
     for element in data:
         if element.get("my_chat_member"):
             key = 'my_chat_member'
@@ -57,8 +57,7 @@ async def answer(text, chat_id, session):
         if text == "/start":
             params.update({"text": words.get(text)})
             await session.get(url, params=params)
-
-            params.update({"text": f"Лови последнюю новость {last_news_link}"})
+            params.update({"text": f"Лови последнюю новость: {last_news_link}"})
             await session.get(url, params=params)
         elif text.startswith("/last"):
             params.update({"text": f"{last_news_link}"})
@@ -67,7 +66,7 @@ async def answer(text, chat_id, session):
             params.update({"text": text})
             await session.get(url, params=params)
 
-        log.info(f"Answer to chat: {chat_id} {params.get('text')}")
+        log.info(f"Answer to chat: {chat_id} ")
 
 
 async def poller(session):
@@ -79,7 +78,7 @@ async def poller(session):
         async with session.get(url, params=params) as resp:
             response = await resp.json()
         if response.get("ok"):
-            pars(response.get("result"))
+            parsing(response.get("result"))
         if updates:
             offset = updates[-1].update_id + 1
             event: Update = updates.popleft()

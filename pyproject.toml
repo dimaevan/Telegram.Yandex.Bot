@@ -1,2 +1,25 @@
 [tool.vulture]
 exclude= ["venv/", ".git/"]
+
+[tool.poetry]
+name = "telegram.yandex.bot"
+version = "0.1.0"
+description = ""
+authors = ["Dima Evan <dimaevan@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+aiohttp = "^3.8.1"
+beautifulsoup4 = "^4.10.0"
+PyYAML = "^6.0"
+psycopg2 = "^2.9.3"
+asyncio = "^3.4.3"
+lxml = "^4.8.0"
+
+[tool.poetry.dev-dependencies]
+flake8 = "^4.0.1"
+vulture = "^2.3"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

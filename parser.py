@@ -22,8 +22,8 @@ async def scraper(session, time):
             response = search_last_link(await resp.text())
             last_url = db.get_last_url()
             if last_url != response:
-                if db.insert_url_into_db(response):
-                    log.info(f"Get new url {response}")
+                db.insert_url_into_db(response)
+                log.info(f"Get new url {response}")
             log.info(f"No new links,"
-                     f" parser is sleeping for {time} minutes ")
-            await asyncio.sleep(time * 60)
+                     f" parser is sleeping for {time} minutes")
+            await asyncio.sleep(time * 1)

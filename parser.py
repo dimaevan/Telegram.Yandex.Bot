@@ -1,13 +1,12 @@
 from bs4 import BeautifulSoup
-import logging as log
+from logger import log
 import asyncio
 import db
 
+URL = "https://vc.ru/new"
 
-URL = "https://vc.ru/popular"
 
-
-def search_last_link(source):
+def parser(source):
     soup = BeautifulSoup(source, 'lxml')
     big_div = soup.find(attrs={"data-gtm": "Feed — Item 1 — Click"})
     if big_div:
@@ -16,14 +15,28 @@ def search_last_link(source):
     log.warning("Url not found")
 
 
-async def scraper(session, time):
+async def last_link_from_url(session):
     async with session.get(URL) as resp:
-        while True:
-            response = search_last_link(await resp.text())
-            last_url = db.get_last_url()
-            if last_url != response:
-                db.insert_url_into_db(response)
-                log.info(f"Get new url {response}")
-            log.info(f"No new links,"
-                     f" parser will sleeping for {time} minutes")
-            await asyncio.sleep(time * 1)
+        response = await resp.text()
+        return str(parser(response))
+
+
+async def check_for_updates(session, time):
+    while True:
+        link_from_site = await last_link_from_url(session)
+        if link_from_site != db.get_last_link():
+            log.info("New link")
+            db.insert_url_into_db(link_from_site)
+        else:
+            log.info("Nothing new")
+        await asyncio.sleep(time * 60)
+
+
+if __name__ == "__main__":
+    import aiohttp
+
+    async def test():
+        async with aiohttp.ClientSession() as session:
+            await check_for_updates(session, 0.1)
+
+    asyncio.run(test())

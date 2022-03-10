@@ -32,7 +32,7 @@ def init_tables():
     access_to_db(query_init)
     query_init = """
     CREATE TABLE IF NOT EXISTS chat
-    (id serial PRIMARY KEY, chat_id bigint UNIQUE, link_id serial );
+    (id serial PRIMARY KEY, chat_id bigint UNIQUE );
     """
     access_to_db(query_init)
 
@@ -44,20 +44,20 @@ def insert_url_into_db(url) -> bool:
 
 
 def insert_chat_into_db(chat_id) -> None:
-    query = f"""INSERT INTO chat (chat_id,link_id)
-     VALUES ('{chat_id}', (SELECT max(link_id) FROM link ) );
-    """
+    query = f"""INSERT INTO chat (chat_id) VALUES ('{chat_id}'); """
     access_to_db(query)
 
 
-def get_last_url():
+def get_last_link() -> str:
     """
     Return last url
     """
     query = """SELECT url FROM link ORDER BY link_id DESC LIMIT 1; """
     last = access_to_db(query, False)
     if last:
-        return last[0][0]
+        return str(last[0][0])
+    else:
+        return ""
 
 
 def get_last_not_sent_urls() -> list:

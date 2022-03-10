@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from config import data_config
 from collections import deque
-from parser import scraper
+from parser import check_for_updates
 from logger import log
 import asyncio
 import aiohttp
@@ -51,7 +51,8 @@ async def init(session):
 async def answer(text, chat_id, session):
     url = build_query("sendMessage")
     params = {"chat_id": chat_id}
-    last_news_link = db.get_last_url()
+    last_news_link = db.get_last_link()
+
     if text:
         db.insert_chat_into_db(chat_id)
         if text == "/start":
@@ -101,16 +102,10 @@ async def distribution(session, time):
         await asyncio.sleep(time * 60)
 
 
-async def main(update=10):
-
+async def main(update=1):
     async with aiohttp.ClientSession() as session:
         await init(session)
-        task1 = asyncio.create_task(poller(session))
-        task2 = asyncio.create_task(scraper(session, update))
-        task3 = asyncio.create_task(distribution(session, update))
-        await task1
-        await task2
-        await task3
+        await asyncio.gather(poller(session), check_for_updates(session, update), distribution(session, update))
 
 
 if __name__ == "__main__":

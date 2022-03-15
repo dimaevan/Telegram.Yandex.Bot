@@ -1,8 +1,11 @@
 # Telegram.Yandex.Bot
 
 # Create role and database in Postgresql
-> psql - U postgres
-> create user yandex with login password 'yandex';
-> alter role yandex login createdb;
-> create database yandex;
-> grant all privileges on database yandex to yandex;
+> psql - U postgres  
+> CREATE USER yandex with login password 'yandex';  
+> ALTER ROLE yandex login createdb;  
+> CREATE database yandex;  
+> GRANT ALL PRIVILEGES ON database yandex TO yandex;
+
+# Install as service:
+> cp bot.service /lib/systemd/system/

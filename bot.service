@@ -1,12 +1,14 @@
 [Unit]
 Description=Telegram Bot Service
 After=multi-user.target
-Conflicts=getty@tty1.service
+
 
 [Service]
 Type=simple
+WorkingDirectory=/root/Telegram.Yandex.Bot
+Environment=PYTHONPATH=/root/Telegram.Yandex.Bot/.venv
 ExecStart=/root/Telegram.Yandex.Bot/.venv/bin/python /root/Telegram.Yandex.Bot/main.py
-StandardInput=tty-force
+
 
 [Install]
 WantedBy=multi-user.target
